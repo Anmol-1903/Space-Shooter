@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityStandardAssets.CrossPlatformInput;
 public class PlayerMovement : MonoBehaviour
 {
     UIManager uIManager;
@@ -16,6 +17,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] GameObject _tripleshotPrefab;
     [SerializeField] GameObject _sheildVisualizer;
 
+    [SerializeField] GameObject _explosionPrefab;
+    
 
     [SerializeField] GameObject[] _thrusters;
     
@@ -39,16 +42,27 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         Movement();
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _nextBulletTime)
+
+#if UNITY_ANDROID               // executes only if you are on Android
+        if ((Input.GetKeyDown(KeyCode.Space) || CrossPlatformInputManager.GetButtonDown("Fire")) && Time.time > _nextBulletTime)
         {
-            _nextBulletTime = Time.time + _bulletCoolDown;
             Shoot();
         }
+#else
+        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) && Time.time > _nextBulletTime)
+        {
+            Shoot();
+        }
+#endif
     }
     void Movement()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        if (!isAlive)
+        {
+            return;
+        }
+        float horizontal = CrossPlatformInputManager.GetAxis("Horizontal");
+        float vertical = CrossPlatformInputManager.GetAxis("Vertical");
 
         Vector3 direction = new Vector3(horizontal, vertical, 0f);
 
@@ -68,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Shoot()
     {
+        _nextBulletTime = Time.time + _bulletCoolDown;
         if (trippleShotActive)
         {
             Instantiate(_tripleshotPrefab, transform.position + _bulletOffset, Quaternion.identity);
@@ -105,7 +120,8 @@ public class PlayerMovement : MonoBehaviour
         if(_lives < 1)
         {
             isAlive = false;
-            Destroy(this.gameObject);
+            Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
+            Destroy(this.gameObject, 1f);
         }
     }
     public void AddScore(int points)
@@ -129,12 +145,9 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(_powerUpTime);
         _currentSpeedMultiplier = 1;
     }
-    public IEnumerator PowerUpOff2(float _powerUpTime)
+    public void PowerUpOff2(float _powerUpTime)
     {
         sheildActive = true;
         _sheildVisualizer.SetActive(true);
-        yield return new WaitForSeconds(_powerUpTime);
-        _sheildVisualizer.SetActive(false);
-        sheildActive = false;
     }
 }

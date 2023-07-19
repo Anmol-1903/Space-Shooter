@@ -40,7 +40,7 @@ public class PowerUP : MonoBehaviour
                         PM.StartCoroutine(PM.PowerUpOff1(_powerUpTime));
                         break;
                     case 2:
-                        PM.StartCoroutine(PM.PowerUpOff2(_powerUpTime));
+                        PM.PowerUpOff2(_powerUpTime);
                         break;
                 }
             }
