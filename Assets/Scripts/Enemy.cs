@@ -3,6 +3,13 @@ public class Enemy : MonoBehaviour
 {
     [SerializeField] float _speed = 4f;
     PlayerMovement PM;
+    [SerializeField] private int points = 10;
+    [SerializeField] Animator anim;
+    private void Start()
+    {
+        anim = GetComponent<Animator>();
+        PM = GameObject.Find("Player").GetComponent<PlayerMovement>();
+    }
     private void Update()
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
@@ -16,16 +23,31 @@ public class Enemy : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            PM = other.GetComponent<PlayerMovement>();
             if(PM != null)
             {
                 PM.TakeDamage();
             }
+            if (anim != null)
+            {
+                anim.SetTrigger("OnEnemyDeath");
+            }
+            _speed = 0;
+            Destroy(this.gameObject, 2.6f);
         }
         if (other.CompareTag("Bullet"))
         {
+            if (PM != null)
+            {
+                PM.AddScore(points);
+            }
+
+            if (anim != null)
+            {
+                anim.SetTrigger("OnEnemyDeath");
+            }
+            _speed = 0;
             Destroy(other.gameObject);
+            Destroy(this.gameObject,2.6f);
         }
-        Destroy(this.gameObject);
     }
 }

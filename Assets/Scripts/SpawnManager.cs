@@ -4,7 +4,7 @@ public class SpawnManager : MonoBehaviour
 {
     [SerializeField] GameObject _enemy;
     [SerializeField] Transform _enemyContainer;
-    [SerializeField] GameObject _powerUp;
+    [SerializeField] GameObject[] _powerUp;
     [SerializeField] float _enemySpawnInterval = 5f;
     [SerializeField] float[] _powerUpSpawnInterval;
     Vector3 randPos;
@@ -13,13 +13,14 @@ public class SpawnManager : MonoBehaviour
     {
         PM = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerMovement>();
     }
-    private void Start()
+    public void StartSpawning()
     {
         StartCoroutine(SpawnEnemy());
         StartCoroutine(SpawnPowerUp());
     }
     IEnumerator SpawnEnemy()
     {
+            yield return new WaitForSeconds(3f);
         while (PM.playerIsAlive())
         {
             randPos = new Vector3(Random.Range(-9f, 9f), 8f, 0f);
@@ -30,10 +31,12 @@ public class SpawnManager : MonoBehaviour
     }
     IEnumerator SpawnPowerUp()
     {
+            yield return new WaitForSeconds(10f);
         while (PM.playerIsAlive())
         {
             randPos = new Vector3(Random.Range(-9f, 9f), 8f, 0f);
-            Instantiate(_powerUp, randPos, Quaternion.identity);
+            int randPoweUp = Random.Range(0, _powerUp.Length);
+            Instantiate(_powerUp[randPoweUp], randPos, Quaternion.identity);
             yield return new WaitForSeconds(_powerUpSpawnInterval[Random.Range(0, _powerUpSpawnInterval.Length)]);
         }
     }
