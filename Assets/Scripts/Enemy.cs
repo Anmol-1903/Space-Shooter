@@ -5,10 +5,15 @@ public class Enemy : MonoBehaviour
     PlayerMovement PM;
     [SerializeField] private int points = 10;
     [SerializeField] Animator anim;
+
+
+    [SerializeField] AudioSource _explosionSound;
+
     private void Start()
     {
         anim = GetComponent<Animator>();
         PM = GameObject.Find("Player").GetComponent<PlayerMovement>();
+        _explosionSound = GetComponent<AudioSource>();
     }
     private void Update()
     {
@@ -23,7 +28,7 @@ public class Enemy : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if(PM != null)
+            if (PM != null)
             {
                 PM.TakeDamage();
             }
@@ -32,6 +37,7 @@ public class Enemy : MonoBehaviour
                 anim.SetTrigger("OnEnemyDeath");
             }
             _speed = 0;
+            _explosionSound.Play();
             Destroy(this.gameObject, 2.6f);
         }
         if (other.CompareTag("Bullet"))
@@ -47,7 +53,8 @@ public class Enemy : MonoBehaviour
             }
             _speed = 0;
             Destroy(other.gameObject);
-            Destroy(this.gameObject,2.6f);
+            _explosionSound.Play();
+            Destroy(this.gameObject, 2.6f);
         }
     }
 }

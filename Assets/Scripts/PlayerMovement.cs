@@ -26,14 +26,15 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] bool trippleShotActive = false;
     [SerializeField] bool sheildActive = false;
 
-
-
     [SerializeField] int _score = 0;
 
+    [SerializeField] AudioClip _bulletSound;
+    [SerializeField] AudioSource _AudioSource;
     private void Start()
     {
         _currentSpeedMultiplier = 1f;
         uIManager = GameObject.Find("UIManager").GetComponent<UIManager>();
+        _AudioSource = GetComponent<AudioSource>();
     }
     private void Update()
     {
@@ -74,6 +75,11 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             Instantiate(_bullet, transform.position + _bulletOffset, Quaternion.identity);
+        }
+        if (_AudioSource != null)
+        {
+            _AudioSource.clip = _bulletSound;
+            _AudioSource.Play();
         }
     }
 
