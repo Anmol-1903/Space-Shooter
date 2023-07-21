@@ -1,13 +1,15 @@
 using UnityEngine;
 using System.Collections;
-using UnityStandardAssets.CrossPlatformInput;
 public class PlayerMovement : MonoBehaviour
 {
+    [SerializeField] bool Player1;
+    [SerializeField] bool Player2;
     UIManager uIManager;
+    GameManager gameManager;
 
     [SerializeField] int _lives = 3;
     [SerializeField] float _speed = 5f;
-    [SerializeField] float _speedMultiplier = 2f;
+    [SerializeField] float _speedMultiplier;
 
     private float _currentSpeedMultiplier;
 
@@ -33,27 +35,35 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] AudioClip _bulletSound;
     [SerializeField] AudioSource _AudioSource;
+
+    [SerializeField] Animator _animator;
+
     private void Start()
     {
         _currentSpeedMultiplier = 1f;
         uIManager = GameObject.Find("UIManager").GetComponent<UIManager>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         _AudioSource = GetComponent<AudioSource>();
+        _animator = GetComponent<Animator>();
     }
     private void Update()
     {
-        Movement();
-
-#if UNITY_ANDROID               // executes only if you are on Android
-        if ((Input.GetKeyDown(KeyCode.Space) || CrossPlatformInputManager.GetButtonDown("Fire")) && Time.time > _nextBulletTime)
+        if (Player1)
         {
-            Shoot();
+            Movement();
+            if ((Input.GetKeyDown(KeyCode.Space) || (Input.GetMouseButtonDown(0) && !gameManager.isPaused)) && Time.time > _nextBulletTime)
+            {
+                Shoot();
+            }
         }
-#else
-        if ((Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)) && Time.time > _nextBulletTime)
+        else if (Player2)
         {
-            Shoot();
+            Movement2();
+            if ((Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.RightControl)) && Time.time > _nextBulletTime)
+            {
+                Shoot2();
+            }
         }
-#endif
     }
     void Movement()
     {
@@ -61,8 +71,8 @@ public class PlayerMovement : MonoBehaviour
         {
             return;
         }
-        float horizontal = CrossPlatformInputManager.GetAxis("Horizontal");
-        float vertical = CrossPlatformInputManager.GetAxis("Vertical");
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
         Vector3 direction = new Vector3(horizontal, vertical, 0f);
 
@@ -78,6 +88,7 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = new Vector3(11.5f, transform.position.y, 0);
         }
+        _animator.SetFloat("Dir",horizontal);
     }
 
     void Shoot()
@@ -85,11 +96,54 @@ public class PlayerMovement : MonoBehaviour
         _nextBulletTime = Time.time + _bulletCoolDown;
         if (trippleShotActive)
         {
-            Instantiate(_tripleshotPrefab, transform.position + _bulletOffset, Quaternion.identity);
+            Instantiate(_tripleshotPrefab, this.transform.position + _bulletOffset, Quaternion.identity);
         }
         else
         {
-            Instantiate(_bullet, transform.position + _bulletOffset, Quaternion.identity);
+            Instantiate(_bullet, this.transform.position + _bulletOffset, Quaternion.identity);
+        }
+        if (_AudioSource != null)
+        {
+            _AudioSource.clip = _bulletSound;
+            _AudioSource.Play();
+        }
+    }
+    void Movement2()
+    {
+        if (!isAlive)
+        {
+            return;
+        }
+        float horizontal = Input.GetAxis("Horizontal2");
+        float vertical = Input.GetAxis("Vertical2");
+
+        Vector3 direction = new Vector3(horizontal, vertical, 0f);
+
+        transform.Translate(direction * _speed * _currentSpeedMultiplier * Time.deltaTime);
+
+        transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, -3.8f, 0f), 0);
+
+        if(transform.position.x > 11.5f)
+        {
+            transform.position = new Vector3(-11.5f, transform.position.y, 0);
+        }
+        else if(transform.position.x < -11.5f)
+        {
+            transform.position = new Vector3(11.5f, transform.position.y, 0);
+        }
+        _animator.SetFloat("Dir",horizontal);
+    }
+
+    void Shoot2()
+    {
+        _nextBulletTime = Time.time + _bulletCoolDown;
+        if (trippleShotActive)
+        {
+            Instantiate(_tripleshotPrefab, this.transform.position + _bulletOffset, Quaternion.identity);
+        }
+        else
+        {
+            Instantiate(_bullet, this.transform.position + _bulletOffset, Quaternion.identity);
         }
         if (_AudioSource != null)
         {
@@ -107,7 +161,14 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
         _lives--;
-        uIManager.UpdateLives(_lives);
+        if (gameObject.CompareTag("Player"))
+        {
+            uIManager.UpdateLives(_lives);
+        }
+        else if (gameObject.CompareTag("Player2"))
+        {
+            uIManager.UpdateLives2(_lives);
+        }
         if(_lives == 2)
         {
             _thrusters[Random.Range(0, _thrusters.Length)].SetActive(true);

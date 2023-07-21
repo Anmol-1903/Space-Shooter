@@ -20,7 +20,7 @@ public class SpawnManager : MonoBehaviour
     }
     IEnumerator SpawnEnemy()
     {
-            yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(3f);
         while (PM.playerIsAlive())
         {
             randPos = new Vector3(Random.Range(-9f, 9f), 8f, 0f);
@@ -31,7 +31,7 @@ public class SpawnManager : MonoBehaviour
     }
     IEnumerator SpawnPowerUp()
     {
-            yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(10f);
         while (PM.playerIsAlive())
         {
             randPos = new Vector3(Random.Range(-9f, 9f), 8f, 0f);

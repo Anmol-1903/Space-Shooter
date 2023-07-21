@@ -2,7 +2,8 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] float _speed = 4f;
-    PlayerMovement PM;
+    PlayerMovement PM1;
+    PlayerMovement PM2;
     [SerializeField] private int points = 10;
     [SerializeField] Animator anim;
 
@@ -12,7 +13,8 @@ public class Enemy : MonoBehaviour
     private void Start()
     {
         anim = GetComponent<Animator>();
-        PM = GameObject.Find("Player").GetComponent<PlayerMovement>();
+        PM1 = GameObject.Find("Player (1)").GetComponent<PlayerMovement>();
+        PM2 = GameObject.Find("Player (2)").GetComponent<PlayerMovement>();
         _explosionSound = GetComponent<AudioSource>();
     }
     private void Update()
@@ -28,9 +30,9 @@ public class Enemy : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (PM != null)
+            if (PM1 != null)
             {
-                PM.TakeDamage();
+                PM1.TakeDamage();
             }
             if (anim != null)
             {
@@ -38,13 +40,29 @@ public class Enemy : MonoBehaviour
             }
             _speed = 0;
             _explosionSound.Play();
+            Destroy(GetComponent<Collider2D>());
+            Destroy(this.gameObject, 2.6f);
+        }
+        if (other.CompareTag("Player2"))
+        {
+            if (PM2 != null)
+            {
+                PM2.TakeDamage();
+            }
+            if (anim != null)
+            {
+                anim.SetTrigger("OnEnemyDeath");
+            }
+            _speed = 0;
+            _explosionSound.Play();
+            Destroy(GetComponent<Collider2D>());
             Destroy(this.gameObject, 2.6f);
         }
         if (other.CompareTag("Bullet"))
         {
-            if (PM != null)
+            if (PM1 != null)
             {
-                PM.AddScore(points);
+                PM1.AddScore(points);
             }
 
             if (anim != null)
@@ -54,6 +72,24 @@ public class Enemy : MonoBehaviour
             _speed = 0;
             Destroy(other.gameObject);
             _explosionSound.Play();
+            Destroy(GetComponent<Collider2D>());
+            Destroy(this.gameObject, 2.6f);
+        }
+        if (other.CompareTag("Bullet"))
+        {
+            if (PM2 != null)
+            {
+                PM2.AddScore(points);
+            }
+
+            if (anim != null)
+            {
+                anim.SetTrigger("OnEnemyDeath");
+            }
+            _speed = 0;
+            Destroy(other.gameObject);
+            _explosionSound.Play();
+            Destroy(GetComponent<Collider2D>());
             Destroy(this.gameObject, 2.6f);
         }
     }
